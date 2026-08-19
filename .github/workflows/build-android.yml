@@ -30,10 +30,18 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Add Android platform & sync
+      - name: Verify www folder
         run: |
-          npx cap add android
-          npx cap sync android
+          echo "Checking www folder..."
+          ls -la www/
+          test -f www/index.html && echo "index.html exists" || (echo "index.html MISSING" && exit 1)
+          head -5 www/index.html
+
+      - name: Add Android platform
+        run: npx cap add android
+
+      - name: Sync web assets
+        run: npx cap sync android
 
       - name: Build Debug APK
         working-directory: android
