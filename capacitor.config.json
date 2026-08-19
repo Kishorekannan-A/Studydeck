@@ -1,0 +1,22 @@
+{
+  "appId": "com.studydeck.app",
+  "appName": "Study Deck",
+  "webDir": "www",
+  "server": {
+    "androidScheme": "https"
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 1500,
+      "backgroundColor": "#F0EDE3",
+      "showSpinner": false
+    },
+    "StatusBar": {
+      "style": "DARK",
+      "backgroundColor": "#1D2B3A"
+    }
+  },
+  "android": {
+    "allowMixedContent": true
+  }
+}

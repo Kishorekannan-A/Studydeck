@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#1D2B3A">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Study Deck</title>
+<link href="https://fonts.googleapis.com/css2?family=Zilla+Slab:wght@400;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F0EDE3;
+    --rule:#C9D6E3;
+    --ink:#1D2B3A;
+    --ink-soft:#4A5A6A;
+    --red:#B4272D;
+    --green:#2F6844;
+    --yellow:#F2C14E;
+    --card:#FFFEF9;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    background-image: repeating-linear-gradient(to bottom, transparent, transparent 27px, var(--rule) 28px);
+    color:var(--ink);
+    font-family:'IBM Plex Mono', monospace;
+    min-height:100vh;
+    min-height:100dvh;
+    display:flex;
+    justify-content:center;
+    padding:32px 16px 80px;
+    padding-top: max(32px, env(safe-area-inset-top));
+    padding-bottom: max(80px, env(safe-area-inset-bottom));
+  }
+  .wrap{ width:100%; max-width:640px; }
+
+  header{ margin-bottom:28px; }
+  .brand{
+    display:flex; align-items:baseline; gap:10px; margin-bottom:4px;
+  }
+  .brand .mark{
+    font-family:'Zilla Slab', serif; font-weight:700; font-size:30px; letter-spacing:-0.5px;
+  }
+  .brand .mark span{ color:var(--red); }
+  .brand .tag{
+    font-size:11px; color:var(--ink-soft); text-transform:uppercase; letter-spacing:1.5px;
+  }
+  .hairline{ border:none; border-top:2px solid var(--ink); margin:14px 0 0; }
+
+  /* ---- Setup screen ---- */
+  .setup-card{
+    background:var(--card);
+    border:1px solid var(--ink);
+    box-shadow:4px 4px 0 rgba(29,43,58,0.15);
+    padding:24px 22px;
+    margin-top:22px;
+  }
+  .field-label{
+    font-family:'Zilla Slab', serif; font-weight:600; font-size:15px; margin-bottom:6px; display:block;
+  }
+  input[type=text]{
+    width:100%; font-family:'IBM Plex Mono', monospace; font-size:15px;
+    padding:10px 12px; border:1px solid var(--ink); background:transparent; color:var(--ink);
+    margin-bottom:16px;
+  }
+  input[type=text]:focus{ outline:2px solid var(--red); outline-offset:1px; }
+  .chiprow{ display:flex; flex-wrap:wrap; gap:8px; margin-bottom:18px; }
+  .chip{
+    font-size:12px; border:1px solid var(--ink-soft); color:var(--ink-soft);
+    padding:5px 10px; cursor:pointer; background:transparent; font-family:'IBM Plex Mono', monospace;
+  }
+  .chip:hover{ border-color:var(--ink); color:var(--ink); }
+  select{
+    font-family:'IBM Plex Mono', monospace; font-size:14px; padding:9px 10px;
+    border:1px solid var(--ink); background:var(--card); color:var(--ink); margin-bottom:18px;
+  }
+  .btn{
+    font-family:'Zilla Slab', serif; font-weight:700; font-size:15px;
+    background:var(--ink); color:var(--paper); border:none; padding:12px 22px;
+    cursor:pointer; letter-spacing:0.3px;
+  }
+  .btn:hover{ background:var(--red); }
+  .btn:disabled{ background:#9aa5ae; cursor:default; }
+  .btn-ghost{
+    background:transparent; color:var(--ink); border:1px solid var(--ink);
+  }
+  .btn-ghost:hover{ background:var(--ink); color:var(--paper); }
+
+  /* ---- Quiz card (index card) ---- */
+  .index-card{
+    position:relative;
+    background:var(--card);
+    border:1px solid var(--ink);
+    box-shadow:5px 5px 0 rgba(29,43,58,0.18);
+    padding:26px 24px 22px;
+    margin-top:22px;
+  }
+  .index-card::before{
+    content:"";
+    position:absolute; left:0; right:0; top:44px;
+    border-top:1px solid var(--rule);
+  }
+  .progress-row{
+    display:flex; justify-content:space-between; align-items:center;
+    font-size:12px; color:var(--ink-soft); margin-bottom:20px; letter-spacing:0.5px;
+  }
+  .q-number{ color:var(--red); font-weight:600; }
+  .q-text{
+    font-family:'Zilla Slab', serif; font-weight:600; font-size:19px; line-height:1.4; margin:0 0 20px;
+  }
+  .opt{
+    display:block; width:100%; text-align:left;
+    font-family:'IBM Plex Mono', monospace; font-size:14px;
+    padding:12px 14px; margin-bottom:9px;
+    border:1px solid var(--ink-soft); background:transparent; color:var(--ink);
+    cursor:pointer;
+  }
+  .opt:hover{ border-color:var(--ink); background:#F6F4EC; }
+  .opt.correct{ border-color:var(--green); background:#E9F3EC; color:var(--green); font-weight:600; }
+  .opt.wrong{ border-color:var(--red); background:#FBEAEA; color:var(--red); font-weight:600; text-decoration:line-through; }
+  .opt.disabled{ cursor:default; }
+  .opt-letter{ color:var(--ink-soft); margin-right:8px; }
+
+  .mark{
+    display:inline-block; font-size:22px; font-weight:700; margin-right:8px;
+  }
+  .mark.ok{ color:var(--green); }
+  .mark.no{ color:var(--red); }
+  .feedback{
+    margin-top:16px; padding-top:14px; border-top:1px dashed var(--ink-soft);
+    font-size:13.5px; line-height:1.55; color:var(--ink-soft);
+  }
+  .feedback strong{ color:var(--ink); }
+  .next-row{ margin-top:20px; text-align:right; }
+
+  /* ---- Results ---- */
+  .score-big{
+    font-family:'Zilla Slab', serif; font-size:56px; font-weight:700; line-height:1;
+  }
+  .score-label{ font-size:12px; letter-spacing:1.5px; text-transform:uppercase; color:var(--ink-soft); margin-top:4px;}
+  .weak-list{ margin:18px 0; padding:0; list-style:none; }
+  .weak-list li{
+    font-size:13.5px; padding:8px 0; border-bottom:1px solid var(--rule);
+  }
+  .weak-list li::before{ content:"→ "; color:var(--red); }
+
+  /* ---- History ---- */
+  .hist-item{
+    display:flex; justify-content:space-between; align-items:center;
+    border-bottom:1px solid var(--rule); padding:11px 2px; font-size:13.5px;
+  }
+  .hist-subj{ font-weight:600; }
+  .hist-meta{ color:var(--ink-soft); font-size:12px; }
+  .hist-score{ font-family:'Zilla Slab', serif; font-weight:700; font-size:16px; }
+
+  .loading{
+    text-align:center; padding:50px 0; color:var(--ink-soft); font-size:14px;
+  }
+  .loading .dots::after{
+    content:'...'; animation: dots 1.2s steps(4,end) infinite;
+  }
+  @keyframes dots{ 0%,20%{content:'.'} 40%{content:'..'} 60%,100%{content:'...'} }
+
+  .top-nav{ display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; }
+  .link-btn{
+    background:none; border:none; font-family:'IBM Plex Mono', monospace; font-size:12px;
+    color:var(--ink-soft); cursor:pointer; text-decoration:underline; padding:0;
+  }
+  .link-btn:hover{ color:var(--red); }
+  .error-box{
+    border:1px solid var(--red); background:#FBEAEA; color:var(--red);
+    padding:12px 14px; font-size:13px; margin-top:16px;
+  }
+  @media (max-width:480px){
+    .q-text{ font-size:17px; }
+    .score-big{ font-size:44px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+
+<script>
+const app = document.getElementById('app');
+
+let state = {
+  view: 'setup', // setup | loading | quiz | results | history
+  subject: '',
+  focus: '',
+  difficulty: 'mixed',
+  questions: [],
+  current: 0,
+  answers: [], // {correct: bool, chosen, topic}
+  selected: null,
+  history: [],
+  error: null
+};
+
+function render(){
+  if(state.view === 'setup') return renderSetup();
+  if(state.view === 'loading') return renderLoading();
+  if(state.view === 'quiz') return renderQuiz();
+  if(state.view === 'results') return renderResults();
+  if(state.view === 'history') return renderHistory();
+}
+
+function paint(){ app.innerHTML = render(); attachHandlers(); }
+
+function header(){
+  return `
+  <header>
+    <div class="top-nav">
+      <div class="brand"><span class="mark">Study<span>Deck</span></span></div>
+      <button class="link-btn" data-nav="history">history →</button>
+    </div>
+    <div class="tag">personalized quiz cards for any subject or exam</div>
+    <hr class="hairline">
+  </header>`;
+}
+
+function renderSetup(){
+  const chips = ['MCAT Biochem','AP US History','Korean TOPIK','AWS Solutions Architect','Organic Chemistry','CFA Level 1'];
+  return `
+  ${header()}
+  <div class="setup-card">
+    <label class="field-label">Subject or exam</label>
+    <input type="text" id="subj" placeholder="e.g. Cellular respiration, Praxis Core Math..." value="${escapeHtml(state.subject)}">
+    <div class="chiprow">
+      ${chips.map(c=>`<button class="chip" data-chip="${escapeHtml(c)}">${c}</button>`).join('')}
+    </div>
+    <label class="field-label">Focus topic (optional)</label>
+    <input type="text" id="focus" placeholder="e.g. just the Krebs cycle" value="${escapeHtml(state.focus)}">
+    <label class="field-label">Difficulty</label><br>
+    <select id="diff">
+      <option value="easy" ${state.difficulty==='easy'?'selected':''}>Easy — building basics</option>
+      <option value="mixed" ${state.difficulty==='mixed'?'selected':''}>Mixed — standard review</option>
+      <option value="hard" ${state.difficulty==='hard'?'selected':''}>Hard — exam-level</option>
+    </select><br>
+    <button class="btn" id="startBtn">Generate quiz card →</button>
+    ${state.error ? `<div class="error-box">${escapeHtml(state.error)}</div>` : ''}
+  </div>`;
+}
+
+function renderLoading(){
+  return `${header()}
+  <div class="index-card">
+    <div class="loading">Writing your quiz on <strong>${escapeHtml(state.subject)}</strong><span class="dots"></span></div>
+  </div>`;
+}
+
+function renderQuiz(){
+  const q = state.questions[state.current];
+  const answered = state.selected !== null;
+  const letters = ['A','B','C','D'];
+  return `${header()}
+  <div class="index-card">
+    <div class="progress-row">
+      <span class="q-number">Q${state.current+1} / ${state.questions.length}</span>
+      <span>${escapeHtml(state.subject)}${state.focus ? ' · '+escapeHtml(state.focus) : ''}</span>
+    </div>
+    <p class="q-text">${escapeHtml(q.question)}</p>
+    ${q.options.map((opt,i)=>{
+      let cls = 'opt';
+      if(answered){
+        cls += ' disabled';
+        if(i === q.correct_index) cls += ' correct';
+        else if(i === state.selected) cls += ' wrong';
+      }
+      return `<button class="${cls}" data-opt="${i}" ${answered?'disabled':''}><span class="opt-letter">${letters[i]}</span>${escapeHtml(opt)}</button>`;
+    }).join('')}
+    ${answered ? `
+      <div class="feedback">
+        <span class="mark ${state.selected===q.correct_index?'ok':'no'}">${state.selected===q.correct_index?'✓':'✗'}</span>
+        <strong>${state.selected===q.correct_index?'Correct.':'Not quite.'}</strong> ${escapeHtml(q.explanation)}
+      </div>
+      <div class="next-row">
+        <button class="btn" id="nextBtn">${state.current+1 < state.questions.length ? 'Next →' : 'See results →'}</button>
+      </div>
+    ` : ''}
+  </div>`;
+}
+
+function renderResults(){
+  const total = state.answers.length;
+  const correct = state.answers.filter(a=>a.correct).length;
+  const pct = Math.round((correct/total)*100);
+  const weakTopics = [...new Set(state.answers.filter(a=>!a.correct).map(a=>a.topic))];
+  return `${header()}
+  <div class="index-card">
+    <div class="score-big">${correct}/${total}</div>
+    <div class="score-label">${pct}% — ${escapeHtml(state.subject)}${state.focus ? ' · '+escapeHtml(state.focus) : ''}</div>
+    ${weakTopics.length ? `
+      <p class="field-label" style="margin-top:22px;">Review these next</p>
+      <ul class="weak-list">${weakTopics.map(t=>`<li>${escapeHtml(t)}</li>`).join('')}</ul>
+    ` : `<p style="margin-top:22px; color:var(--green); font-weight:600;">Clean sweep. No weak spots flagged.</p>`}
+    <div style="margin-top:22px; display:flex; gap:10px; flex-wrap:wrap;">
+      <button class="btn" id="againBtn">Study again</button>
+      <button class="btn btn-ghost" id="newBtn">New subject</button>
+    </div>
+  </div>`;
+}
+
+function renderHistory(){
+  return `${header()}
+  <div class="index-card">
+    <p class="field-label" style="margin-bottom:14px;">Past sessions</p>
+    ${state.history.length===0 ? `<p style="color:var(--ink-soft); font-size:13.5px;">Nothing logged yet — finish a quiz card and it'll show up here.</p>` : ''}
+    ${state.history.slice().reverse().map(h=>`
+      <div class="hist-item">
+        <div>
+          <div class="hist-subj">${escapeHtml(h.subject)}${h.focus?' · '+escapeHtml(h.focus):''}</div>
+          <div class="hist-meta">${new Date(h.date).toLocaleDateString()} · ${h.difficulty}</div>
+        </div>
+        <div class="hist-score">${h.correct}/${h.total}</div>
+      </div>
+    `).join('')}
+    <div style="margin-top:20px;">
+      <button class="btn btn-ghost" id="backBtn">← New quiz</button>
+    </div>
+  </div>`;
+}
+
+function escapeHtml(s){
+  return String(s ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+
+function attachHandlers(){
+  const nav = app.querySelector('[data-nav="history"]');
+  if(nav) nav.onclick = ()=>{ state.view='history'; paint(); };
+
+  const backBtn = app.querySelector('#backBtn');
+  if(backBtn) backBtn.onclick = ()=>{ state.view='setup'; paint(); };
+
+  app.querySelectorAll('[data-chip]').forEach(el=>{
+    el.onclick = ()=>{ state.subject = el.getAttribute('data-chip'); paint(); };
+  });
+
+  const subjInput = app.querySelector('#subj');
+  if(subjInput) subjInput.oninput = e=>{ state.subject = e.target.value; };
+  const focusInput = app.querySelector('#focus');
+  if(focusInput) focusInput.oninput = e=>{ state.focus = e.target.value; };
+  const diffSelect = app.querySelector('#diff');
+  if(diffSelect) diffSelect.onchange = e=>{ state.difficulty = e.target.value; };
+
+  const startBtn = app.querySelector('#startBtn');
+  if(startBtn) startBtn.onclick = startQuiz;
+
+  app.querySelectorAll('[data-opt]').forEach(el=>{
+    el.onclick = ()=>{
+      const i = parseInt(el.getAttribute('data-opt'));
+      selectOption(i);
+    };
+  });
+
+  const nextBtn = app.querySelector('#nextBtn');
+  if(nextBtn) nextBtn.onclick = ()=>{
+    if(state.current+1 < state.questions.length){
+      state.current++; state.selected = null; paint();
+    } else {
+      finishQuiz();
+    }
+  };
+
+  const againBtn = app.querySelector('#againBtn');
+  if(againBtn) againBtn.onclick = startQuiz;
+  const newBtn = app.querySelector('#newBtn');
+  if(newBtn) newBtn.onclick = ()=>{ state.view='setup'; paint(); };
+}
+
+function selectOption(i){
+  if(state.selected !== null) return;
+  state.selected = i;
+  const q = state.questions[state.current];
+  state.answers.push({
+    correct: i === q.correct_index,
+    chosen: i,
+    topic: q.topic || state.subject
+  });
+  paint();
+}
+
+async function startQuiz(){
+  if(!state.subject.trim()){
+    state.error = 'Enter a subject or exam name to generate a quiz card.';
+    paint();
+    return;
+  }
+  state.error = null;
+  state.view = 'loading';
+  state.current = 0;
+  state.answers = [];
+  state.selected = null;
+  paint();
+
+  const prompt = `You are a tutor creating a short practice quiz.
+Subject: ${state.subject}
+${state.focus ? 'Focus specifically on: ' + state.focus : ''}
+Difficulty: ${state.difficulty}
+
+Write exactly 5 multiple-choice questions testing understanding of this subject. Each question must have exactly 4 options, one correct answer, a short 1-2 sentence explanation of why the answer is correct, and a short "topic" label (2-4 words) naming the specific sub-topic the question tests, so weak areas can be identified later.
+
+Respond with ONLY valid JSON, no markdown fences, no preamble, in exactly this shape:
+{"questions":[{"question":"...","options":["...","...","...","..."],"correct_index":0,"explanation":"...","topic":"..."}]}`;
+
+  try{
+    // IMPORTANT: Replace with your own backend proxy or add a proper API key.
+    // Never ship a real Anthropic API key inside a mobile app binary.
+    // Recommended: call your own server that holds the key.
+    const response = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        // "x-api-key": "YOUR_KEY_HERE",          // insecure if left in client
+        // "anthropic-version": "2023-06-01"
+      },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-6",
+        max_tokens: 1000,
+        messages: [{ role: "user", content: prompt }]
+      })
+    });
+    const data = await response.json();
+    const textBlock = (data.content || []).find(c => c.type === 'text');
+    if(!textBlock) throw new Error('No response from tutor.');
+    let clean = textBlock.text.trim().replace(/^```json/i,'').replace(/^```/,'').replace(/```$/,'').trim();
+    const parsed = JSON.parse(clean);
+    if(!parsed.questions || !parsed.questions.length) throw new Error('Empty question set.');
+    state.questions = parsed.questions;
+    state.view = 'quiz';
+    paint();
+  } catch(err){
+    console.error(err);
+    state.view = 'setup';
+    state.error = "Couldn't generate that quiz — try rephrasing the subject or try again. (Check API key / network)";
+    paint();
+  }
+}
+
+async function finishQuiz(){
+  const total = state.answers.length;
+  const correct = state.answers.filter(a=>a.correct).length;
+  const record = {
+    subject: state.subject,
+    focus: state.focus,
+    difficulty: state.difficulty,
+    correct, total,
+    date: Date.now()
+  };
+  state.history.push(record);
+  state.view = 'results';
+  paint();
+  try{
+    localStorage.setItem('studydeck_history', JSON.stringify(state.history));
+  } catch(e){ console.error('storage save failed', e); }
+}
+
+function loadHistory(){
+  try{
+    const raw = localStorage.getItem('studydeck_history');
+    if(raw){
+      state.history = JSON.parse(raw);
+    }
+  } catch(e){ console.error('history load failed', e); }
+  paint();
+}
+
+paint();
+loadHistory();
+</script>
+</body>
+</html>
